@@ -43,7 +43,7 @@ func (f *Flame) PublicDir(path string) *Flame {
 }
 
 func (f *Flame) Serve(port int) error {
-	console.InfoPrint{}.Listen(port)
+	console.NewInfoPrint().Listen(port)
 	handler := serve.New(f.wwwRoot, f.Router.Export(), f.Middleware, f.Debug)
 	return nethttp.ListenAndServe(fmt.Sprintf(":%v", port), handler)
 }

@@ -1,12 +1,12 @@
 package serve
 
 import (
-	"fmt"
 	"github.com/goflame/flame/inertal/dev"
 	"github.com/goflame/flame/pkg/http/middleware"
 	"github.com/goflame/flame/pkg/router"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type Server struct {
@@ -32,9 +32,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := os.Stat(s.wwwRoot + r.URL.Path); err == nil {
-		fmt.Println("File exists", s.wwwRoot+r.URL.Path)
-		http.ServeFile(w, r, s.wwwRoot+r.URL.Path)
-		return
+		if !strings.HasSuffix(r.URL.Path, "/") {
+			dr.FileLog(r.URL.Path)
+			http.ServeFile(w, r, s.wwwRoot+r.URL.Path)
+			return
+		}
 	}
 
 	NewRouter(s).HandleRoute(w, r)

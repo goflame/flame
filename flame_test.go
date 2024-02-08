@@ -11,8 +11,8 @@ func TestNewServer(t *testing.T) {
 	app := New("FlameCore", true)
 
 	app.PublicDir(Root("/web"))
-	app.Router.Get("/test", func(res *http.Response, req *http.Request) *response.Err {
-		return res.String("Hello World not file!")
+	app.Router.Get("/", func(res *http.Response, req *http.Request) *response.Err {
+		return res.String("Hello")
 	})
 	log.Fatal(app.Serve(8000))
 }
