@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	rr "github.com/goflame/flame/inertal/response"
 	"github.com/goflame/flame/pkg/http/response"
+	nethttp "net/http"
 )
 
 type Response struct {
@@ -31,6 +32,11 @@ func (r *Response) Headers(h map[string]string) *Response {
 	for k, v := range h {
 		r.headers[k] = v
 	}
+	return r
+}
+
+func (r *Response) Header(name string, value string) *Response {
+	r.headers[name] = value
 	return r
 }
 
@@ -69,8 +75,17 @@ func (r *Response) Empty() *response.Err {
 	return r.Text("")
 }
 
+func (r *Response) File(path string, req *Request) *response.Err {
+	nethttp.ServeFile(*r.rr.ResponseWriter, req.NetRequest(), path)
+	return nil
+}
+
 func (r *Response) Error(err error) *response.Err {
 	return response.NewError(err)
+}
+
+func (r *Response) NetResponseWriter() nethttp.ResponseWriter {
+	return *r.rr.ResponseWriter
 }
 
 func (r *Response) beforeSend() {

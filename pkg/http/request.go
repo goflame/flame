@@ -22,3 +22,7 @@ func NewRequest(req *http.Request) *Request {
 func (r *Request) Method() string {
 	return r.req.Method
 }
+
+func (r *Request) NetRequest() *http.Request {
+	return r.req
+}

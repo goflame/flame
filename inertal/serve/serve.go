@@ -2,24 +2,23 @@ package serve
 
 import (
 	"fmt"
-	"github.com/fatih/color"
+	"github.com/goflame/flame/inertal/dev"
 	"github.com/goflame/flame/pkg/http/middleware"
 	"github.com/goflame/flame/pkg/router"
-	"golang.org/x/term"
-	"math"
 	"net/http"
-	"strings"
-	"time"
+	"os"
 )
 
 type Server struct {
+	wwwRoot    string
 	Middleware *middleware.Middleware
 	Routes     []*router.Route
 	Debug      bool
 }
 
-func New(r []*router.Route, m *middleware.Middleware, d bool) *Server {
+func New(static string, r []*router.Route, m *middleware.Middleware, d bool) *Server {
 	return &Server{
+		wwwRoot:    static,
 		Routes:     r,
 		Middleware: m,
 		Debug:      d,
@@ -27,41 +26,16 @@ func New(r []*router.Route, m *middleware.Middleware, d bool) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	dr := dev.Request{}
 	if s.Debug == true {
-		s.printRequest(r.Method, r.URL.Path)
+		dr.Log(r.Method, r.URL.Path)
 	}
+
+	if _, err := os.Stat(s.wwwRoot + r.URL.Path); err == nil {
+		fmt.Println("File exists", s.wwwRoot+r.URL.Path)
+		http.ServeFile(w, r, s.wwwRoot+r.URL.Path)
+		return
+	}
+
 	NewRouter(s).HandleRoute(w, r)
-}
-
-func (s *Server) printRequest(m string, p string) {
-	var method string
-
-	switch m {
-	case "GET":
-		method = color.New(color.FgGreen).Sprintf("%v", m)
-		break
-	case "POST":
-		method = color.New(color.FgBlue).Sprintf("%v", m)
-		break
-	case "PUT":
-		method = color.New(color.FgCyan).Sprintf("%v", m)
-		break
-	case "PATCH":
-		method = color.New(color.FgHiYellow).Sprintf("%v", m)
-		break
-	case "DELETE":
-		method = color.New(color.FgRed).Sprintf("%v", m)
-		break
-	}
-
-	w, _, err := term.GetSize(0)
-	t := time.Now().UTC().Format(time.TimeOnly)
-	l := w - len(fmt.Sprintf("[ %v ]%v %v", t, m, p)) - 1
-	if err != nil || l <= 0 {
-		fmt.Printf("[%v] %v", method, p)
-	} else {
-		dot := ". "
-		dots := strings.Repeat(dot, int(math.Round(float64(l/2))))
-		fmt.Printf("[ %v ] %v %v%v\n", method, color.New(color.FgHiBlack).Sprintf("%v", t), color.New(color.FgHiBlack).Sprintf("%v", dots), p)
-	}
 }
