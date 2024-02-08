@@ -33,7 +33,7 @@ func (f *Flame) DotEnv(path string) {
 	f.envFile = path
 }
 
-func (f *Flame) Public(path string) *Flame {
+func (f *Flame) PublicDir(path string) *Flame {
 	if strings.HasSuffix(path, "/") {
 		f.wwwRoot = path[0 : len(path)-2]
 	} else {

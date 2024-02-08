@@ -10,7 +10,7 @@ import (
 func TestNewServer(t *testing.T) {
 	app := New("FlameCore", true)
 
-	app.Public(Root("/web"))
+	app.PublicDir(Root("/web"))
 	app.Router.Get("/test", func(res *http.Response, req *http.Request) *response.Err {
 		return res.String("Hello World not file!")
 	})
