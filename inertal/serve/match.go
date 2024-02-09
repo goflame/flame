@@ -10,8 +10,8 @@ func NewMatch(path string) *Match {
 	}
 }
 
-func (m *Match) Try(path string) (bool, map[string]string) {
-	if path == m.path {
+func (m *Match) Try(incomingPath string) (bool, map[string]string) {
+	if incomingPath == m.path {
 		return true, make(map[string]string)
 	}
 	return false, make(map[string]string)

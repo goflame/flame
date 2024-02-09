@@ -12,7 +12,6 @@ import (
 
 type Flame struct {
 	appName    string
-	envFile    string
 	Middleware *middleware.Middleware
 	Router     *router.Router
 	Debug      bool
@@ -22,15 +21,10 @@ type Flame struct {
 func New(name string, debug bool) *Flame {
 	return &Flame{
 		appName:    name,
-		envFile:    "",
 		Router:     router.New(),
 		Middleware: middleware.New(),
 		Debug:      debug,
 	}
-}
-
-func (f *Flame) DotEnv(path string) {
-	f.envFile = path
 }
 
 func (f *Flame) PublicDir(path string) *Flame {
@@ -42,8 +36,12 @@ func (f *Flame) PublicDir(path string) *Flame {
 	return f
 }
 
+func (f *Flame) Route(name string, props Map) string {
+	return findRoute(name, props, f)
+}
+
 func (f *Flame) Serve(port int) error {
 	console.NewInfoPrint().Listen(port)
-	handler := serve.New(f.wwwRoot, f.Router.Export(), f.Middleware, f.Debug)
+	handler := serve.New(f.wwwRoot, f.Router.Export(), f.Router.GetErrorHandler(), f.Middleware, f.Debug)
 	return nethttp.ListenAndServe(fmt.Sprintf(":%v", port), handler)
 }

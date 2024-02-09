@@ -15,7 +15,10 @@ func (r *Err) Status(s int) *Err {
 }
 
 func (r *Err) GetError() error {
-	return nil
+	if r == nil {
+		return nil
+	}
+	return r.err
 }
 
 func (r *Err) GetStatus() int {

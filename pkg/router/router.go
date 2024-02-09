@@ -5,12 +5,14 @@ import (
 )
 
 type Router struct {
-	routes []*Route
+	routes       []*Route
+	errorHandler handler.ErrorHandler
 }
 
 func New() *Router {
 	return &Router{
-		routes: []*Route{},
+		routes:       []*Route{},
+		errorHandler: handler.DefaultErrorHandler,
 	}
 }
 
@@ -38,6 +40,15 @@ func (r *Router) Group(prefix string, f func(*Group)) *Group {
 	g := NewGroup(prefix, r)
 	f(g)
 	return g
+}
+
+func (r *Router) SetErrorHandler(h handler.ErrorHandler) *Router {
+	r.errorHandler = h
+	return r
+}
+
+func (r *Router) GetErrorHandler() handler.ErrorHandler {
+	return r.errorHandler
 }
 
 func (r *Router) Export() []*Route {

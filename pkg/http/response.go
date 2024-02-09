@@ -46,6 +46,7 @@ func (r *Response) Next() *response.Err {
 }
 
 func (r *Response) JSON(d interface{}) *response.Err {
+	r.Header("Content-Type", "application/json")
 	r.beforeSend()
 	err := json.NewEncoder(*r.rr.ResponseWriter).Encode(d)
 	if err != nil {
@@ -76,7 +77,7 @@ func (r *Response) Empty() *response.Err {
 }
 
 func (r *Response) File(path string, req *Request) *response.Err {
-	nethttp.ServeFile(*r.rr.ResponseWriter, req.NetRequest(), path)
+	nethttp.ServeFile(*r.rr.ResponseWriter, req.Net(), path)
 	return nil
 }
 
@@ -84,7 +85,7 @@ func (r *Response) Error(err error) *response.Err {
 	return response.NewError(err)
 }
 
-func (r *Response) NetResponseWriter() nethttp.ResponseWriter {
+func (r *Response) Net() nethttp.ResponseWriter {
 	return *r.rr.ResponseWriter
 }
 
@@ -92,4 +93,5 @@ func (r *Response) beforeSend() {
 	for k, v := range r.headers {
 		(*r.rr.ResponseWriter).Header().Set(k, v)
 	}
+	(*r.rr.ResponseWriter).WriteHeader(r.code)
 }

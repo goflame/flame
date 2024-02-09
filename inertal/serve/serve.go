@@ -2,9 +2,12 @@ package serve
 
 import (
 	"github.com/goflame/flame/inertal/dev"
+	"github.com/goflame/flame/inertal/response"
+	"github.com/goflame/flame/pkg/handler"
+	"github.com/goflame/flame/pkg/http"
 	"github.com/goflame/flame/pkg/http/middleware"
 	"github.com/goflame/flame/pkg/router"
-	"net/http"
+	nethttp "net/http"
 	"os"
 	"strings"
 )
@@ -14,30 +17,47 @@ type Server struct {
 	Middleware *middleware.Middleware
 	Routes     []*router.Route
 	Debug      bool
+	Eh         handler.ErrorHandler
 }
 
-func New(static string, r []*router.Route, m *middleware.Middleware, d bool) *Server {
+func New(static string, r []*router.Route, eh handler.ErrorHandler, m *middleware.Middleware, d bool) *Server {
 	return &Server{
 		wwwRoot:    static,
 		Routes:     r,
 		Middleware: m,
 		Debug:      d,
+		Eh:         eh,
 	}
 }
 
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ServeHTTP(w nethttp.ResponseWriter, r *nethttp.Request) {
 	dr := dev.Request{}
 	if s.Debug == true {
 		dr.Log(r.Method, r.URL.Path)
 	}
 
+	rr, res, req := s.convertRequest(w, r)
+
+	if !handleMiddleware(s.Middleware, rr, res, req, s) {
+		return
+	}
+
 	if _, err := os.Stat(s.wwwRoot + r.URL.Path); err == nil {
 		if !strings.HasSuffix(r.URL.Path, "/") {
 			dr.FileLog(r.URL.Path)
-			http.ServeFile(w, r, s.wwwRoot+r.URL.Path)
+			nethttp.ServeFile(w, r, s.wwwRoot+r.URL.Path)
 			return
 		}
 	}
 
-	NewRouter(s).HandleRoute(w, r)
+	NewRouter(s).HandleRoute(rr, res, req)
+}
+
+func (*Server) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*response.RootResponse, *http.Response, *http.Request) {
+	rr := response.NewRootResponse(&w)
+	return rr, http.NewResponse(rr), http.NewRequest(r)
+}
+
+func (s *Server) handleError(res *http.Response, req *http.Request, err error, code int) {
+	s.Eh(res, req, err, code)
 }

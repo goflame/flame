@@ -1,10 +1,10 @@
 package serve
 
 import (
+	"errors"
 	"fmt"
 	"github.com/goflame/flame/inertal/response"
 	"github.com/goflame/flame/pkg/http"
-	nethttp "net/http"
 )
 
 type Router struct {
@@ -17,61 +17,38 @@ func NewRouter(s *Server) *Router {
 	}
 }
 
-func (m *Router) HandleRoute(w nethttp.ResponseWriter, r *nethttp.Request) {
-	rr, res, req := m.convertRequest(w, r)
-	for _, mw := range *m.server.Middleware.GetHandlers() {
-		err := mw(res, req)
-		if e := err.GetError(); e != nil {
-			m.handleError(e, err.GetStatus())
-			return
-		}
-		canContinue := rr.CanContinue()
-		rr.Reset()
-		if canContinue {
+func (r *Router) HandleRoute(rr *response.RootResponse, res *http.Response, req *http.Request) {
+	router := NewMatch(req.Net().URL.Path)
+	for _, route := range r.server.Routes {
+		if route.Method != req.Method() {
 			continue
 		}
-		return
-	}
-	router := NewMatch(r.URL.Path)
-	for _, route := range m.server.Routes {
-		if route.Method != r.Method {
-			continue
-		}
+
 		ok, props := router.Try(route.Path)
+
 		if !ok {
 			continue
 		}
+
 		req.Props = props
+
 		for _, mw := range route.Middlewares {
-			for _, mh := range *mw.GetHandlers() {
-				err := mh(res, req)
-				if e := err.GetError(); e != nil {
-					m.handleError(e, err.GetStatus())
-					return
-				}
-				canContinue := rr.CanContinue()
-				rr.Reset()
-				if canContinue {
-					continue
-				}
+			if !handleMiddleware(mw, rr, res, req, r.server) {
 				return
 			}
 		}
+
 		h := *route.Handler
 		err := h(res, req)
+
 		if e := err.GetError(); e != nil {
-			m.handleError(e, err.GetStatus())
+			fmt.Println(e)
+			r.server.handleError(res, req, e, err.GetStatus())
 			return
 		}
+
 		return
 	}
-}
 
-func (m *Router) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*response.RootResponse, *http.Response, *http.Request) {
-	rr := response.NewRootResponse(&w)
-	return rr, http.NewResponse(rr), http.NewRequest(r)
-}
-
-func (m *Router) handleError(err error, code int) {
-	fmt.Println(err, code)
+	r.server.handleError(res, req, errors.New("this page could not be found"), 404)
 }
