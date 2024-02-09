@@ -2,7 +2,6 @@ package serve
 
 import (
 	"errors"
-	"fmt"
 	"github.com/goflame/flame/inertal/response"
 	"github.com/goflame/flame/pkg/http"
 )
@@ -42,7 +41,6 @@ func (r *Router) HandleRoute(rr *response.RootResponse, res *http.Response, req 
 		err := h(res, req)
 
 		if e := err.GetError(); e != nil {
-			fmt.Println(e)
 			r.server.handleError(res, req, e, err.GetStatus())
 			return
 		}
