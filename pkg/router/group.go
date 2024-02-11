@@ -6,17 +6,15 @@ import (
 )
 
 type Group struct {
-	router      *Router
-	prefix      string
-	Middlewares []*middleware.Middleware
-	routes      []*Route
+	router *Router
+	prefix string
+	routes []*Route
 }
 
 func NewGroup(prefix string, router *Router) *Group {
 	return &Group{
-		router:      router,
-		prefix:      prefix,
-		Middlewares: []*middleware.Middleware{},
+		router: router,
+		prefix: prefix,
 	}
 }
 
@@ -41,17 +39,10 @@ func (g *Group) Delete(path string, handler handler.Handler) *Route {
 }
 
 func (g *Group) Middleware(m *middleware.Middleware) *Group {
-	g.Middlewares = append(g.Middlewares, m)
-	return g
-}
-
-func (g *Group) Apply() {
-	for _, r := range g.routes {
-		route := g.router.addRoute(r.Method, r.Path, *r.Handler)
-		for _, m := range g.Middlewares {
-			route.Middleware(m)
-		}
+	for _, route := range g.routes {
+		route.Middleware(m)
 	}
+	return g
 }
 
 func (g *Group) path(path string) string {
@@ -68,11 +59,7 @@ func (g *Group) path(path string) string {
 }
 
 func (g *Group) route(method string, path string, handler handler.Handler) *Route {
-	r := &Route{
-		Method:  method,
-		Path:    g.path(path),
-		Handler: &handler,
-	}
+	r := g.router.addRoute(method, g.path(path), handler)
 	g.routes = append(g.routes, r)
 	return r
 }
