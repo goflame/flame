@@ -1,7 +1,6 @@
 package cors
 
 import (
-	"errors"
 	"github.com/goflame/flame/pkg/handler"
 	"github.com/goflame/flame/pkg/http"
 	"github.com/goflame/flame/pkg/http/response"
@@ -33,11 +32,11 @@ func New(conf Config) handler.Handler {
 	return c.Middleware
 }
 
-func (c Cors) Middleware(res *http.Response, req *http.Request) *response.Err {
+func (c Cors) Middleware(res http.Response, req *http.Request) *response.Err {
 	if req.Method() == nethttp.MethodGet {
 		if c.config.AllowHandler != nil {
 			h := *c.config.AllowHandler
-			if h(res, req) {
+			if h(&res, req) {
 				nr := req.Net()
 				// TODO: finish configuring cors middleware
 				res.Headers(map[string]string{
@@ -66,7 +65,7 @@ func (c Cors) Middleware(res *http.Response, req *http.Request) *response.Err {
 				res.Header("Access-Control-Max-Age", strconv.Itoa(c.config.MaxAge))
 			}
 		}
-		return res.Error(errors.New("cors failed"))
+		return res.Error("cors failed")
 	}
 	return res.Next()
 }

@@ -16,14 +16,14 @@ func NewRouter(s *Server) *Router {
 	}
 }
 
-func (r *Router) HandleRoute(rr *response.RootResponse, res *http.Response, req *http.Request) {
-	router := NewMatch(req.Net().URL.Path)
+func (r *Router) HandleRoute(m Match, rr *response.RootResponse, res *http.Response, req *http.Request) {
+	m.Incoming(req.Net().URL.Path)
 	for _, route := range r.server.Routes {
 		if route.Method != req.Method() {
 			continue
 		}
 
-		ok, props := router.Try(route.Path)
+		ok, props := m.TryPattern(route.Path)
 
 		if !ok {
 			continue
@@ -38,7 +38,7 @@ func (r *Router) HandleRoute(rr *response.RootResponse, res *http.Response, req 
 		}
 
 		h := *route.Handler
-		err := h(res, req)
+		err := h(*res, req)
 
 		if e := err.GetError(); e != nil {
 			r.server.handleError(res, req, e, err.GetStatus())

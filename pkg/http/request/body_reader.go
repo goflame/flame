@@ -19,7 +19,7 @@ func NewBodyReader(b *io.ReadCloser) *BodyReader {
 func (b *BodyReader) Byte() ([]byte, *response.Err) {
 	bt, err := io.ReadAll(*b.body)
 	if err != nil {
-		return nil, response.NewError(err).Status(400)
+		return nil, response.NewError(err.Error()).Status(400)
 	}
 	return bt, nil
 }
@@ -27,7 +27,7 @@ func (b *BodyReader) Byte() ([]byte, *response.Err) {
 func (b *BodyReader) JSON(s *any) *response.Err {
 	err := json.NewDecoder(*b.body).Decode(s)
 	if err != nil {
-		return response.NewError(err).Status(400)
+		return response.NewError(err.Error()).Status(400)
 	}
 	return nil
 }

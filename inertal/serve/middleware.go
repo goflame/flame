@@ -8,7 +8,7 @@ import (
 
 func handleMiddleware(ms *middleware.Middleware, rr *response.RootResponse, res *http.Response, req *http.Request, s *Server) bool {
 	for _, m := range *ms.GetHandlers() {
-		e := m(res, req)
+		e := m(*res, req)
 
 		if e != nil {
 			err := e.GetError()

@@ -7,12 +7,14 @@ import (
 type Router struct {
 	routes       []*Route
 	errorHandler handler.ErrorHandler
+	rules        Rules
 }
 
 func New() *Router {
 	return &Router{
 		routes:       []*Route{},
 		errorHandler: handler.DefaultErrorHandler,
+		rules:        defaultRules{}.Make(),
 	}
 }
 
@@ -42,6 +44,11 @@ func (r *Router) Group(prefix string, f func(*Group)) *Group {
 	return g
 }
 
+func (r *Router) Rule(n string, c RuleCheck) *Router {
+	r.rules[n] = c
+	return r
+}
+
 func (r *Router) SetErrorHandler(h handler.ErrorHandler) *Router {
 	r.errorHandler = h
 	return r
@@ -53,6 +60,10 @@ func (r *Router) GetErrorHandler() handler.ErrorHandler {
 
 func (r *Router) Export() []*Route {
 	return r.routes
+}
+
+func (r *Router) GetRules() *Rules {
+	return &r.rules
 }
 
 func (r *Router) addRoute(method string, path string, handler handler.Handler) *Route {

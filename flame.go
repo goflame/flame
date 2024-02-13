@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/goflame/flame/inertal/console"
 	"github.com/goflame/flame/inertal/serve"
+	"github.com/goflame/flame/pkg/config"
 	"github.com/goflame/flame/pkg/http/middleware"
 	"github.com/goflame/flame/pkg/router"
 	nethttp "net/http"
@@ -16,15 +17,23 @@ type Flame struct {
 	Router     *router.Router
 	Debug      bool
 	wwwRoot    string
+	config     *config.App
 }
 
 func New(name string, debug bool) *Flame {
-	return &Flame{
+	f := &Flame{
 		appName:    name,
 		Router:     router.New(),
 		Middleware: middleware.New(),
 		Debug:      debug,
 	}
+	f.applyDefaultConfig()
+
+	return f
+}
+
+func (f *Flame) Configure(c *config.App) {
+	f.config = c
 }
 
 func (f *Flame) PublicDir(path string) *Flame {
@@ -42,6 +51,22 @@ func (f *Flame) Route(name string, props Map) string {
 
 func (f *Flame) Serve(port int) error {
 	console.NewInfoPrint().Listen(port)
-	handler := serve.New(f.wwwRoot, f.Router.Export(), f.Router.GetErrorHandler(), f.Middleware, f.Debug)
+
+	f.config.RouterMatch.SetRules(f.Router.GetRules())
+
+	handler := serve.New(
+		f.config,
+		f.wwwRoot,
+		f.Router.Export(),
+		f.Router.GetErrorHandler(),
+		f.Middleware,
+		f.Debug,
+	)
 	return nethttp.ListenAndServe(fmt.Sprintf(":%v", port), handler)
+}
+
+func (f *Flame) applyDefaultConfig() {
+	f.config = &config.App{
+		RouterMatch: &router.Match{},
+	}
 }

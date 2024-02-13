@@ -1,11 +1,13 @@
 package response
 
+import "errors"
+
 type Err struct {
-	err    error
+	err    string
 	status int
 }
 
-func NewError(err error) *Err {
+func NewError(err string) *Err {
 	return &Err{err, 500}
 }
 
@@ -18,7 +20,7 @@ func (r *Err) GetError() error {
 	if r == nil {
 		return nil
 	}
-	return r.err
+	return errors.New(r.err)
 }
 
 func (r *Err) GetStatus() int {

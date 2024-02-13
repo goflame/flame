@@ -50,7 +50,7 @@ func (r *Response) JSON(d interface{}) *response.Err {
 	r.beforeSend()
 	err := json.NewEncoder(*r.rr.ResponseWriter).Encode(d)
 	if err != nil {
-		return response.NewError(err)
+		return response.NewError(err.Error())
 	}
 	return nil
 }
@@ -60,7 +60,7 @@ func (r *Response) String(s string) *response.Err {
 	rw := *r.rr.ResponseWriter
 	_, err := rw.Write([]byte(s))
 	if err != nil {
-		return response.NewError(err)
+		return response.NewError(err.Error())
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func (r *Response) File(path string, req *Request) *response.Err {
 	return nil
 }
 
-func (r *Response) Error(err error) *response.Err {
+func (r *Response) Error(err string) *response.Err {
 	return response.NewError(err)
 }
 

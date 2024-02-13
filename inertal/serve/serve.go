@@ -3,6 +3,7 @@ package serve
 import (
 	"github.com/goflame/flame/inertal/dev"
 	"github.com/goflame/flame/inertal/response"
+	"github.com/goflame/flame/pkg/config"
 	"github.com/goflame/flame/pkg/handler"
 	"github.com/goflame/flame/pkg/http"
 	"github.com/goflame/flame/pkg/http/middleware"
@@ -18,15 +19,17 @@ type Server struct {
 	Routes     []*router.Route
 	Debug      bool
 	Eh         handler.ErrorHandler
+	AppConfig  *config.App
 }
 
-func New(static string, r []*router.Route, eh handler.ErrorHandler, m *middleware.Middleware, d bool) *Server {
+func New(c *config.App, static string, r []*router.Route, eh handler.ErrorHandler, m *middleware.Middleware, d bool) *Server {
 	return &Server{
 		wwwRoot:    static,
 		Routes:     r,
 		Middleware: m,
 		Debug:      d,
 		Eh:         eh,
+		AppConfig:  c,
 	}
 }
 
@@ -50,7 +53,7 @@ func (s *Server) ServeHTTP(w nethttp.ResponseWriter, r *nethttp.Request) {
 		}
 	}
 
-	NewRouter(s).HandleRoute(rr, res, req)
+	NewRouter(s).HandleRoute(s.AppConfig.RouterMatch, rr, res, req)
 }
 
 func (*Server) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*response.RootResponse, *http.Response, *http.Request) {
@@ -59,5 +62,5 @@ func (*Server) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*re
 }
 
 func (s *Server) handleError(res *http.Response, req *http.Request, err error, code int) {
-	s.Eh(res, req, err, code)
+	s.Eh(*res, req, err, code)
 }

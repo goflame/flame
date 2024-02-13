@@ -52,12 +52,12 @@ func (*Request) Log(m string, p string) {
 func (*Request) FileLog(file string) {
 	file = "<public_dir>" + file
 	w, _, err := term.GetSize(0)
-	l := w - len(fmt.Sprintf("          [ FILE ] %v", file)) - 1
+	l := w - len(fmt.Sprintf("--------[ FILE ] %v", file)) - 1
 	if err != nil || l <= 0 {
-		fmt.Printf("\t↳ [ %v ] %v %v\n", color.New(color.FgHiYellow).Sprint("SERVING FILE"), color.New(color.FgHiBlack).Sprint(". . ."), file)
+		fmt.Printf("        ↳ [ %v ] %v %v\n", color.New(color.FgHiYellow).Sprint("SERVING FILE"), color.New(color.FgHiBlack).Sprint(". . ."), file)
 	} else {
 		dot := ". "
 		dots := strings.Repeat(dot, int(math.Round(float64(l/2))))
-		fmt.Printf("\t↳ [ %v ] %v %v\n", color.New(color.FgHiYellow).Sprint("SERVING FILE"), color.New(color.FgHiBlack).Sprint(dots), file)
+		fmt.Printf("        ↳ [ %v ] %v %v\n", color.New(color.FgHiYellow).Sprint("SERVING FILE"), color.New(color.FgHiBlack).Sprint(dots), file)
 	}
 }
