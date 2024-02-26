@@ -12,14 +12,16 @@ type Response struct {
 	code    int
 	headers map[string]string
 	next    bool
+	request *Request
 }
 
-func NewResponse(rr *rr.RootResponse) *Response {
+func NewResponse(rr *rr.RootResponse, req *Request) *Response {
 	return &Response{
 		rr:      rr,
 		code:    200,
 		next:    false,
 		headers: map[string]string{},
+		request: req,
 	}
 }
 
@@ -76,8 +78,16 @@ func (r *Response) Empty() *response.Err {
 	return r.Text("")
 }
 
-func (r *Response) File(path string, req *Request) *response.Err {
-	nethttp.ServeFile(*r.rr.ResponseWriter, req.Net(), path)
+func (r *Response) File(path string) *response.Err {
+	nethttp.ServeFile(*r.rr.ResponseWriter, r.request.Net(), path)
+	return nil
+}
+
+func (r *Response) Redirect(path string) *response.Err {
+	if r.code < 300 || r.code > 300 {
+		r.code = nethttp.StatusSeeOther
+	}
+	nethttp.Redirect(r.Net(), r.request.Net(), path, r.code)
 	return nil
 }
 

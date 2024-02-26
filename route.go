@@ -1,17 +1,25 @@
 package flame
 
 import (
-	"strings"
 	"fmt"
+	"github.com/goflame/flame/pkg/router"
+	"strings"
 )
 
-func findRoute(name string, m Map, f *Flame) string {
-	// FIXIT: 2 Slashes at start
-	routes := f.Router.Export()
+func findRoute(name string, m map[string]any, r *router.Router) string {
+	routes := r.Export()
 	for _, route := range routes {
 		if route.ExportName() == name {
+			rt := route.Path
+			if strings.HasSuffix(rt, "/") {
+				rt = rt[0 : len(rt)-1]
+			}
+			if strings.HasPrefix(rt, "/") {
+				rt = rt[1:]
+			}
+
 			var built string
-			sp := strings.Split(route.Path, "/")
+			sp := strings.Split(rt, "/")
 			for _, part := range sp {
 				if !strings.HasPrefix(part, "{") {
 					built += "/" + part

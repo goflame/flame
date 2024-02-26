@@ -6,14 +6,14 @@ import (
 	"github.com/goflame/flame/pkg/http/middleware"
 )
 
-func handleMiddleware(ms *middleware.Middleware, rr *response.RootResponse, res *http.Response, req *http.Request, s *Server) bool {
+func handleMiddleware(ms *middleware.Middleware, rr *response.RootResponse, ctx *http.Context, s *Server) bool {
 	for _, m := range *ms.GetHandlers() {
-		e := m(*res, req)
+		e := m(ctx)
 
 		if e != nil {
 			err := e.GetError()
 			if err != nil {
-				s.handleError(res, req, err, e.GetStatus())
+				s.handleError(ctx, err, e.GetStatus())
 				return false
 			}
 		}

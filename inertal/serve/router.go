@@ -16,10 +16,10 @@ func NewRouter(s *Server) *Router {
 	}
 }
 
-func (r *Router) HandleRoute(m Match, rr *response.RootResponse, res *http.Response, req *http.Request) {
-	m.Incoming(req.Net().URL.Path)
+func (r *Router) HandleRoute(m Match, rr *response.RootResponse, ctx *http.Context) {
+	m.Incoming(ctx.Request.Net().URL.Path)
 	for _, route := range r.server.Routes {
-		if route.Method != req.Method() {
+		if route.Method != ctx.Request.Method() {
 			continue
 		}
 
@@ -29,24 +29,24 @@ func (r *Router) HandleRoute(m Match, rr *response.RootResponse, res *http.Respo
 			continue
 		}
 
-		req.Props = props
+		ctx.Request.Props = props
 
 		for _, mw := range route.Middlewares {
-			if !handleMiddleware(mw, rr, res, req, r.server) {
+			if !handleMiddleware(mw, rr, ctx, r.server) {
 				return
 			}
 		}
 
 		h := *route.Handler
-		err := h(*res, req)
+		err := h(ctx)
 
 		if e := err.GetError(); e != nil {
-			r.server.handleError(res, req, e, err.GetStatus())
+			r.server.handleError(ctx, e, err.GetStatus())
 			return
 		}
 
 		return
 	}
 
-	r.server.handleError(res, req, errors.New("this page could not be found"), 404)
+	r.server.handleError(ctx, errors.New("this page could not be found"), 404)
 }

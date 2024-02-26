@@ -50,7 +50,7 @@ func (defaultRules) between(value string, args []string) (string, bool) {
 }
 
 func (defaultRules) bool(value string, _ []string) (string, bool) {
-	return value, value == "true" || value == "false"
+	return value, value == "true" || value == "false" || value == "0" || value == "1"
 }
 
 func (d defaultRules) Make() Rules {

@@ -1,6 +1,7 @@
 package flame
 
 import (
+	"fmt"
 	"github.com/goflame/flame/pkg/http"
 	"github.com/goflame/flame/pkg/http/middleware/auth"
 	"github.com/goflame/flame/pkg/http/response"
@@ -10,42 +11,38 @@ import (
 	"testing"
 )
 
-type Env struct {
-	Name string `env:"NAME"`
-}
-
 func TestNewServer(t *testing.T) {
-	app := New("FlameCore", true)
+	app := New(true)
 
 	app.PublicDir(Root("/web"))
 
-	app.Router.Rule("jpeg", func(value string, _ []string) (string, bool) {
-		if !strings.HasSuffix(value, ".jpeg") {
-			return "", false
+	app.Router.Rule("image", func(value string, args []string) (string, bool) {
+		allowedExtensions := append([]string{"jpeg", "png", "jpg", "webp"}, args...)
+
+		for _, ext := range allowedExtensions {
+			if strings.HasSuffix(value, "."+ext) {
+				return value[:len(value)-len("."+ext)], true
+			}
 		}
-		return value[:len(value)-len(".jpeg")], true
+		return "", false
 	})
 
-	app.Router.Get("/test/{image<jpeg>}", func(res http.Response, req *http.Request) *response.Err {
-		return res.JSON(Map{
-			"image": req.Props["image"],
+	app.Router.Get("/test/{profileImage<image[gif]>}", func(c *http.Context) *response.Err {
+		return c.JSON(Map{
+			"image": c.Prop("profileImage"),
 		})
-	})
+	}).Name("image")
 
 	app.Router.Group("/http", func(g *router.Group) {
-		g.Get("/", func(res http.Response, req *http.Request) *response.Err {
-			return res.Text("Hello world")
+		g.Get("/", func(c *http.Context) *response.Err {
+			fmt.Println(c.Get("auth"))
+			return c.String(app.Route("image", Map{
+				"image": "goofy.jpeg",
+			}))
 		})
 	}).Middleware(auth.New(func(req *http.Request) bool {
 		return req.Query("token") == "secret"
 	}))
-
-	app.Router.Get("/", func(res http.Response, req *http.Request) *response.Err {
-		return res.JSON(Map{
-			"id":  5,
-			"url": req.Net().URL.String(),
-		})
-	})
 
 	log.Fatal(app.Serve(8000))
 }

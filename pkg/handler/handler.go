@@ -5,4 +5,4 @@ import (
 	"github.com/goflame/flame/pkg/http/response"
 )
 
-type Handler func(http.Response, *http.Request) *response.Err
+type Handler func(ctx *http.Context) *response.Err

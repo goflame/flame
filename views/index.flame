@@ -1,21 +1,14 @@
-<go extends="layout" />
-
-<go section="main">
-    <go for="_, item := range items">
-        <h1>ID: @{item.Id}</h1>
-        <img src="@{item.Id}" alt="@{item.Alt}" style="width: 100px">
-        <p>@{item.Description}</p>
-    </go>
-    <!-- <go nil "Go also runs here" /> -->
-    <go "index := 5" />
-    <go for>
-        <go block>
-            if len(items) == index+1 {
-                break
-            }
-        </go>
-        <div>
-            <h1>ID: @{items[index].Id}</h1>
-        </div>
-    </go>
-</go>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+    </div>
+</body>
+</html>

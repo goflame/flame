@@ -12,7 +12,6 @@ import (
 )
 
 type Flame struct {
-	appName    string
 	Middleware *middleware.Middleware
 	Router     *router.Router
 	Debug      bool
@@ -20,9 +19,8 @@ type Flame struct {
 	config     *config.App
 }
 
-func New(name string, debug bool) *Flame {
+func New(debug bool) *Flame {
 	f := &Flame{
-		appName:    name,
 		Router:     router.New(),
 		Middleware: middleware.New(),
 		Debug:      debug,
@@ -46,7 +44,7 @@ func (f *Flame) PublicDir(path string) *Flame {
 }
 
 func (f *Flame) Route(name string, props Map) string {
-	return findRoute(name, props, f)
+	return findRoute(name, props, f.Router)
 }
 
 func (f *Flame) Serve(port int) error {

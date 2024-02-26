@@ -1,11 +1,13 @@
 package handler
 
-import "github.com/goflame/flame/pkg/http"
+import (
+	"github.com/goflame/flame/pkg/http"
+)
 
-type ErrorHandler func(http.Response, *http.Request, error, int)
+type ErrorHandler func(*http.Context, error, int)
 
-func DefaultErrorHandler(res http.Response, _ *http.Request, err error, status int) {
-	_ = res.Status(status).
+func DefaultErrorHandler(c *http.Context, err error, status int) {
+	_ = c.Status(status).
 		JSON(map[string]interface{}{
 			"error": err.Error(),
 		})

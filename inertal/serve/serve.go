@@ -39,9 +39,9 @@ func (s *Server) ServeHTTP(w nethttp.ResponseWriter, r *nethttp.Request) {
 		dr.Log(r.Method, r.URL.Path)
 	}
 
-	rr, res, req := s.convertRequest(w, r)
+	rr, ctx := s.convertRequest(w, r)
 
-	if !handleMiddleware(s.Middleware, rr, res, req, s) {
+	if !handleMiddleware(s.Middleware, rr, ctx, s) {
 		return
 	}
 
@@ -53,14 +53,16 @@ func (s *Server) ServeHTTP(w nethttp.ResponseWriter, r *nethttp.Request) {
 		}
 	}
 
-	NewRouter(s).HandleRoute(s.AppConfig.RouterMatch, rr, res, req)
+	NewRouter(s).HandleRoute(s.AppConfig.RouterMatch, rr, ctx)
 }
 
-func (*Server) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*response.RootResponse, *http.Response, *http.Request) {
+func (*Server) convertRequest(w nethttp.ResponseWriter, r *nethttp.Request) (*response.RootResponse, *http.Context) {
 	rr := response.NewRootResponse(&w)
-	return rr, http.NewResponse(rr), http.NewRequest(r)
+	req := http.NewRequest(r)
+	ctx := http.NewContext(req, http.NewResponse(rr, req))
+	return rr, ctx
 }
 
-func (s *Server) handleError(res *http.Response, req *http.Request, err error, code int) {
-	s.Eh(*res, req, err, code)
+func (s *Server) handleError(ctx *http.Context, err error, code int) {
+	s.Eh(ctx, err, code)
 }

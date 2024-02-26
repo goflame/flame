@@ -25,9 +25,10 @@ func NewHandle(allow func(*http.Request) bool) handler.Handler {
 	return m.Middleware
 }
 
-func (m *Middleware) Middleware(res http.Response, req *http.Request) *response.Err {
-	if m.allow(req) {
-		return res.Next()
+func (m *Middleware) Middleware(c *http.Context) *response.Err {
+	if m.allow(c.Request) {
+		c.Set("auth", true)
+		return c.Next()
 	}
-	return res.Error("unauthorized").Status(401)
+	return c.Error("unauthorized").Status(401)
 }
