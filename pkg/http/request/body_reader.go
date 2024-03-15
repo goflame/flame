@@ -24,7 +24,7 @@ func (b *BodyReader) Byte() ([]byte, *response.Err) {
 	return bt, nil
 }
 
-func (b *BodyReader) JSON(s *any) *response.Err {
+func (b *BodyReader) JSON(s any) *response.Err {
 	err := json.NewDecoder(*b.body).Decode(s)
 	if err != nil {
 		return response.NewError(err.Error()).Status(400)
