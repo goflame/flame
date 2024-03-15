@@ -3,6 +3,7 @@ package flame
 import (
 	"fmt"
 	"github.com/goflame/flame/pkg/http"
+	"github.com/goflame/flame/pkg/http/controller"
 	"github.com/goflame/flame/pkg/http/middleware/auth"
 	"github.com/goflame/flame/pkg/http/response"
 	"github.com/goflame/flame/pkg/router"
@@ -10,6 +11,22 @@ import (
 	"strings"
 	"testing"
 )
+
+type TestController struct {
+	controller.Base
+	ctx *http.Context
+}
+
+func (t *TestController) Init(c *http.Context) *response.Err {
+	t.ctx = c
+	return c.Next()
+}
+
+func (t *TestController) Hello() *response.Err {
+	return t.ctx.JSON(Map{
+		"hello": "world",
+	})
+}
 
 func TestNewServer(t *testing.T) {
 	app := New(true)
@@ -43,6 +60,8 @@ func TestNewServer(t *testing.T) {
 	}).Middleware(auth.New(func(req *http.Request) bool {
 		return req.Query("token") == "secret"
 	}))
+
+	app.Router.Get("/controller", controller.Adaptor(&TestController{}, "Hello"))
 
 	log.Fatal(app.Serve(8000))
 }
