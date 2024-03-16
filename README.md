@@ -38,13 +38,13 @@ func main() {
 ```
 
 
-| Name      | Second Header                                                                                                           |
-|-----------|-------------------------------------------------------------------------------------------------------------------------|
-| `int`     | Checks if the parameter is an integer or not.                                                                           |
-| `in`      | Use with multiple args, like this: `/{fruit<in[apple;banana]>}`. This checks if the value is in the list or not.        |
-| `float`   | Checks if the parameter is an float or not.                                                                             |
-| `between` | Use with 2 integers, like this: `/{something<in[1;5]>}`. This checks if the value is an integer between the two number. |
-| `bool`    | Bool checks if it's a boolean or not. Works with both `true` `false` and `0` `1`                                        |
+| Name      | Second Header                                                                                                                |
+|-----------|------------------------------------------------------------------------------------------------------------------------------|
+| `int`     | Checks if the parameter is an integer or not.                                                                                |
+| `in`      | Use with multiple args, like this: `/{fruit<in[apple;banana]>}`. This checks if the value is in the list or not.             |
+| `float`   | Checks if the parameter is an float or not.                                                                                  |
+| `between` | Use with 2 integers, like this: `/{something<between[1;5]>}`. This checks if the value is an integer between the two number. |
+| `bool`    | Bool checks if it's a boolean or not. Works with both `true` `false` and `0` `1`                                             |
 
 
 ### Advanced routing with custom rules and props
