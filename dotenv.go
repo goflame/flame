@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func DotEnv[T any](s *T, path string) error {
+func DotEnv(s any, path string) error {
 	file, err := os.Open(path)
 
 	if err != nil {

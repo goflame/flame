@@ -38,6 +38,10 @@ func (r *Router) Delete(path string, handler handler.Handler) *Route {
 	return r.addRoute("DELETE", path, handler)
 }
 
+func (r *Router) Custom(method string, path string, handler handler.Handler) *Route {
+	return r.addRoute(method, path, handler)
+}
+
 func (r *Router) Group(prefix string, f func(*Group)) *Group {
 	g := NewGroup(prefix, r)
 	f(g)

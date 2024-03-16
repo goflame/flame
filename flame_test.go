@@ -57,6 +57,10 @@ func TestNewServer(t *testing.T) {
 				"image": "goofy.jpeg",
 			}))
 		})
+
+		g.Get("/gt/{id}", func(c *http.Context) *response.Err {
+			return c.Text(c.Prop("id"))
+		})
 	}).Middleware(auth.New(func(req *http.Request) bool {
 		return req.Query("token") == "secret"
 	}))

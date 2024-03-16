@@ -41,7 +41,7 @@ func (m *Match) TryPattern(pattern string) (bool, map[string]string) {
 			}
 		}
 
-		name, val, ok := m.validatePropRule(p[1:len(p)-1], routeParams[1])
+		name, val, ok := m.validatePropRule(p[1:len(p)-1], routeParams[i])
 		if !ok {
 			return false, nil
 		}
